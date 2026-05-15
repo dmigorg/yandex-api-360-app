@@ -1,0 +1,38 @@
+{
+  "name": "yandex-api-360",
+  "version": "1.0.0",
+  "description": "Bun.js TypeScript client for Yandex 360 for Business API",
+  "module": "dist/index.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "build": "bun build src/index.ts --outdir dist --target bun && bunx tsc --emitDeclarationOnly",
+    "typecheck": "bunx tsc --noEmit",
+    "check": "biome check .",
+    "check:fix": "biome check --write ."
+  },
+  "devDependencies": {
+    "@biomejs/biome": "latest",
+    "typescript": "^5.0.0",
+    "@types/bun": "latest"
+  },
+  "keywords": [
+    "yandex",
+    "360",
+    "api",
+    "bun",
+    "typescript"
+  ],
+  "license": "MIT"
+}
