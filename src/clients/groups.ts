@@ -1,5 +1,4 @@
 import { BaseClient } from "../base-client.js";
-import type { Api360Options } from "../options.js";
 import type {
   AddedMember,
   BaseGroup,
@@ -14,10 +13,6 @@ import type {
 import { MemberTypes } from "../types/index.js";
 
 export class GroupsClient extends BaseClient {
-  constructor(options: Api360Options) {
-    super(options);
-  }
-
   /**
    * Returns paginated list of groups.
    * @param page - Page number (1-based)
@@ -170,20 +165,20 @@ export class GroupsClient extends BaseClient {
   /**
    * Adds multiple members to a group using the v2 API (supports external contacts and shared mailboxes).
    * @param groupId - Group identifier
-   * @param opts - IDs to add by type
+   * @param opts - IDs to add by type (`userIds`, `externalContactIds`, `sharedMailboxIds` are string uint64)
    * @returns `true` if the request succeeded
    */
   async addMembers(
     groupId: number,
     opts: {
       departmentIds?: number[];
-      userIds?: number[];
+      userIds?: string[];
       groupIds?: number[];
-      externalContactIds?: number[];
-      sharedMailboxIds?: number[];
+      externalContactIds?: string[];
+      sharedMailboxIds?: string[];
     },
   ): Promise<boolean> {
-    const body: Record<string, number[] | undefined> = {};
+    const body: Record<string, number[] | string[] | undefined> = {};
     if (opts.departmentIds?.length) body.departmentIds = opts.departmentIds;
     if (opts.userIds?.length) body.userIds = opts.userIds;
     if (opts.groupIds?.length) body.groupIds = opts.groupIds;
@@ -203,7 +198,7 @@ export class GroupsClient extends BaseClient {
    * @returns `true` if the request succeeded
    */
   async addMembersList(groupId: number, members: Member[]): Promise<boolean> {
-    const userIds = members.filter((m) => m.type === MemberTypes.user).map((m) => m.id);
+    const userIds = members.filter((m) => m.type === MemberTypes.user).map((m) => String(m.id));
     const departmentIds = members.filter((m) => m.type === MemberTypes.department).map((m) => m.id);
     const groupIds = members.filter((m) => m.type === MemberTypes.group).map((m) => m.id);
     return this.addMembers(groupId, {
@@ -216,20 +211,20 @@ export class GroupsClient extends BaseClient {
   /**
    * Removes multiple members from a group using the v2 API (supports external contacts and shared mailboxes).
    * @param groupId - Group identifier
-   * @param opts - IDs to remove by type
+   * @param opts - IDs to remove by type (`userIds`, `externalContactIds`, `sharedMailboxIds` are string uint64)
    * @returns `true` if the request succeeded
    */
   async removeMembers(
     groupId: number,
     opts: {
       departmentIds?: number[];
-      userIds?: number[];
+      userIds?: string[];
       groupIds?: number[];
-      externalContactIds?: number[];
-      sharedMailboxIds?: number[];
+      externalContactIds?: string[];
+      sharedMailboxIds?: string[];
     },
   ): Promise<boolean> {
-    const body: Record<string, number[] | undefined> = {};
+    const body: Record<string, number[] | string[] | undefined> = {};
     if (opts.departmentIds?.length) body.departmentIds = opts.departmentIds;
     if (opts.userIds?.length) body.userIds = opts.userIds;
     if (opts.groupIds?.length) body.groupIds = opts.groupIds;

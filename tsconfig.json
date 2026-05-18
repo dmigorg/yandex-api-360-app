@@ -1,17 +1,35 @@
 {
   "compilerOptions": {
+    // Environment
+    "lib": ["ESNext"],
     "target": "ESNext",
-    "module": "ESNext",
+    "module": "Preserve",
+    "moduleDetection": "force",
     "moduleResolution": "bundler",
-    "strict": true,
-    "skipLibCheck": true,
+    "types": ["bun"],
+
+    // Emit — tsc only produces .d.ts; bun handles the actual bundle
     "rootDir": "./src",
     "outDir": "./dist",
     "declaration": true,
     "declarationMap": true,
-    "sourceMap": true,
-    "esModuleInterop": true,
-    "types": ["bun-types"]
+    "emitDeclarationOnly": true,
+
+    // Imports
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": true,
+
+    // Safety
+    "strict": true,
+    "skipLibCheck": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+
+    // Disabled intentionally
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noPropertyAccessFromIndexSignature": false
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]

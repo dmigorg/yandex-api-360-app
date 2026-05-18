@@ -4,13 +4,17 @@ import { AuditClient } from "./clients/audit.js";
 import { AuthSettingsClient } from "./clients/auth-settings.js";
 import { DepartmentsClient } from "./clients/departments.js";
 import { DNSClient } from "./clients/dns.js";
+import { DomainPoliciesClient } from "./clients/domain-policies.js";
 import { DomainsClient } from "./clients/domains.js";
+import { ExternalContactsClient } from "./clients/external-contacts.js";
 import { GroupsClient } from "./clients/groups.js";
 import { MailboxesClient } from "./clients/mailboxes.js";
+import { OauthRestrictionsClient } from "./clients/oauth-restrictions.js";
 import { OrganizationsClient } from "./clients/organizations.js";
 import { PasswordManagementClient } from "./clients/password-management.js";
 import { PostSettingsClient } from "./clients/post-settings.js";
 import { RoutingClient } from "./clients/routing.js";
+import { ServiceApplicationsClient } from "./clients/service-applications.js";
 import { TwoFAClient } from "./clients/two-fa.js";
 import { UsersClient } from "./clients/users.js";
 import { Api360Options, type Api360OptionsParams } from "./options.js";
@@ -23,12 +27,16 @@ export class Client extends BaseClient {
   readonly authSettings: AuthSettingsClient;
   readonly departments: DepartmentsClient;
   readonly dns: DNSClient;
+  readonly domainPolicies: DomainPoliciesClient;
   readonly domains: DomainsClient;
+  readonly externalContacts: ExternalContactsClient;
   readonly groups: GroupsClient;
+  readonly oauthRestrictions: OauthRestrictionsClient;
   readonly organization: OrganizationsClient;
   readonly passwordManagement: PasswordManagementClient;
   readonly postSettings: PostSettingsClient;
   readonly routing: RoutingClient;
+  readonly serviceApplications: ServiceApplicationsClient;
   readonly users: UsersClient;
 
   constructor(params: Api360OptionsParams | Api360Options) {
@@ -41,12 +49,16 @@ export class Client extends BaseClient {
     this.authSettings = new AuthSettingsClient(options);
     this.departments = new DepartmentsClient(options);
     this.dns = new DNSClient(options);
+    this.domainPolicies = new DomainPoliciesClient(options);
     this.domains = new DomainsClient(options);
+    this.externalContacts = new ExternalContactsClient(options);
     this.groups = new GroupsClient(options);
+    this.oauthRestrictions = new OauthRestrictionsClient(options);
     this.organization = new OrganizationsClient(options);
     this.passwordManagement = new PasswordManagementClient(options);
     this.postSettings = new PostSettingsClient(options);
     this.routing = new RoutingClient(options);
+    this.serviceApplications = new ServiceApplicationsClient(options);
     this.users = new UsersClient(options);
   }
 }

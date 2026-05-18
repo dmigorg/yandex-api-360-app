@@ -1,12 +1,7 @@
 import { BaseClient } from "../base-client.js";
-import type { Api360Options } from "../options.js";
 import type { Domain, DomainConnectStatus, DomainList } from "../types/index.js";
 
 export class DomainsClient extends BaseClient {
-  constructor(options: Api360Options) {
-    super(options);
-  }
-
   /**
    * Returns paginated list of organization domains.
    * @param page - Page number (1-based)

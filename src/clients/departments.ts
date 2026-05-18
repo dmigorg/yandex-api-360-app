@@ -1,5 +1,4 @@
 import { BaseClient } from "../base-client.js";
-import type { Api360Options } from "../options.js";
 import type {
   BaseDepartment,
   Department,
@@ -10,10 +9,6 @@ import type {
 import { DepartmentsOrderBy } from "../types/index.js";
 
 export class DepartmentsClient extends BaseClient {
-  constructor(options: Api360Options) {
-    super(options);
-  }
-
   /**
    * Returns paginated list of departments.
    * @param page - Page number (1-based)

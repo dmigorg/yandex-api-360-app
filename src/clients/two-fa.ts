@@ -1,5 +1,4 @@
 import { BaseClient } from "../base-client.js";
-import type { Api360Options } from "../options.js";
 import type {
   DomainStatus2FA,
   DomainStatus2FAV2,
@@ -8,10 +7,6 @@ import type {
 } from "../types/index.js";
 
 export class TwoFAClient extends BaseClient {
-  constructor(options: Api360Options) {
-    super(options);
-  }
-
   /**
    * Returns the current domain-level 2FA status (v1).
    * @returns 2FA status with `enabled`, `duration`, and optional `enabledAt`

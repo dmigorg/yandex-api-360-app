@@ -1,5 +1,4 @@
 import { BaseClient } from "../base-client.js";
-import type { Api360Options } from "../options.js";
 import type {
   CollectAddressStatus,
   UserPersonalSettings,
@@ -9,16 +8,23 @@ import type {
 } from "../types/index.js";
 
 export class PostSettingsClient extends BaseClient {
-  constructor(options: Api360Options) {
-    super(options);
-  }
-
+  /**
+   * Returns the sender info settings (from-name, default from address, signatures) for a user.
+   * @param userId - User identifier
+   * @returns User personal mail settings
+   */
   async getSenderInfo(userId: number): Promise<UserPersonalSettings> {
     return this.httpGet<UserPersonalSettings>(
       `${this.options.urlPostSettings}/users/${userId}/settings/sender_info`,
     );
   }
 
+  /**
+   * Updates the sender info settings for a user.
+   * @param userId - User identifier
+   * @param settings - New sender info settings
+   * @returns Updated settings
+   */
   async setSenderInfo(
     userId: number,
     settings: UserPersonalSettings,
@@ -30,12 +36,23 @@ export class PostSettingsClient extends BaseClient {
     );
   }
 
+  /**
+   * Returns whether automatic address collection is enabled for a user.
+   * @param userId - User identifier
+   * @returns Object with `collectAddresses` boolean flag
+   */
   async getCollectAddresses(userId: number): Promise<CollectAddressStatus> {
     return this.httpGet<CollectAddressStatus>(
       `${this.options.urlPostSettings}/users/${userId}/settings/address_book`,
     );
   }
 
+  /**
+   * Enables or disables automatic address collection for a user.
+   * @param userId - User identifier
+   * @param status - Object with `collectAddresses` boolean flag
+   * @returns Updated status
+   */
   async setCollectAddresses(
     userId: number,
     status: CollectAddressStatus,
@@ -47,12 +64,23 @@ export class PostSettingsClient extends BaseClient {
     );
   }
 
+  /**
+   * Returns the list of mail rules (autoreplies and forwards) for a user.
+   * @param userId - User identifier
+   * @returns Lists of autoreply and forward rules
+   */
   async getUserRules(userId: number): Promise<UserRulesList> {
     return this.httpGet<UserRulesList>(
       `${this.options.urlPostSettings}/users/${userId}/settings/user_rules`,
     );
   }
 
+  /**
+   * Creates a new mail rule (autoreply or forward) for a user.
+   * @param userId - User identifier
+   * @param rule - Rule to create (autoreply or forward)
+   * @returns ID of the created rule
+   */
   async addUserRule(userId: number, rule: UserRule): Promise<number> {
     if (!rule) throw new Error("rule is required");
     const result = await this.httpPost<UserRuleAddResponse>(
@@ -62,6 +90,11 @@ export class PostSettingsClient extends BaseClient {
     return result.ruleId;
   }
 
+  /**
+   * Deletes a mail rule for a user.
+   * @param userId - User identifier
+   * @param ruleId - Rule identifier
+   */
   async deleteUserRule(userId: number, ruleId: number): Promise<void> {
     await this.httpDelete(
       `${this.options.urlPostSettings}/users/${userId}/settings/user_rules/${ruleId}`,

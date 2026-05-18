@@ -1,5 +1,4 @@
 import { BaseClient } from "../base-client.js";
-import type { Api360Options } from "../options.js";
 import type {
   BaseContact,
   RemovedAlias,
@@ -12,10 +11,6 @@ import type {
 } from "../types/index.js";
 
 export class UsersClient extends BaseClient {
-  constructor(options: Api360Options) {
-    super(options);
-  }
-
   /**
    * Returns a paginated list of organization users.
    * @param page - Page number (1-based)
@@ -186,21 +181,23 @@ export class UsersClient extends BaseClient {
   }
 
   /**
-   * Uploads an avatar image for a user.
+   * Uploads an avatar image for a user (raw binary upload).
    * @param userId - User identifier
    * @param imageData - Image data as ArrayBuffer or Blob
-   * @param filename - File name hint (default: `avatar.png`)
+   * @param contentType - MIME type of the image (default: `image/png`)
+   * @returns URL of the uploaded avatar
    */
   async setAvatar(
     userId: number,
     imageData: ArrayBuffer | Blob,
-    filename = "avatar.png",
-  ): Promise<void> {
+    contentType = "image/png",
+  ): Promise<string> {
     if (!imageData) throw new Error("imageData is required");
-    const formData = new FormData();
-    const blob =
-      imageData instanceof Blob ? imageData : new Blob([imageData], { type: "image/png" });
-    formData.append("file", blob, filename);
-    await this.httpPutMultipart<unknown>(`${this.options.urlUsers}/${userId}/avatar`, formData);
+    const result = await this.httpPutBinary<{ url: string }>(
+      `${this.options.urlUsers}/${userId}/avatar`,
+      imageData,
+      contentType,
+    );
+    return result.url;
   }
 }

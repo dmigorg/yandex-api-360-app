@@ -89,15 +89,19 @@ export abstract class BaseClient {
     }
   }
 
-  protected async httpPutMultipart<T>(url: string, formData: FormData): Promise<T> {
-    const headers: Record<string, string> = {
-      Authorization: `OAuth ${this.options.token}`,
-      Accept: "application/json",
-    };
+  protected async httpPutBinary<T>(
+    url: string,
+    body: ArrayBuffer | Blob,
+    contentType: string,
+  ): Promise<T> {
     const response = await fetch(url, {
       method: "PUT",
-      headers,
-      body: formData,
+      headers: {
+        Authorization: `OAuth ${this.options.token}`,
+        Accept: "application/json",
+        "Content-Type": contentType,
+      },
+      body,
     });
     await this.checkResponse(response);
     return response.json() as Promise<T>;

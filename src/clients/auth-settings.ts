@@ -1,12 +1,7 @@
 import { BaseClient } from "../base-client.js";
-import type { Api360Options } from "../options.js";
 import type { CookiesSettings } from "../types/index.js";
 
 export class AuthSettingsClient extends BaseClient {
-  constructor(options: Api360Options) {
-    super(options);
-  }
-
   /**
    * Returns the session cookie TTL for the organization.
    * @returns Session TTL in seconds (0 = no limit)

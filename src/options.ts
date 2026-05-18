@@ -77,4 +77,20 @@ export class Api360Options {
   get urlMailboxManagement() {
     return `${this.baseUrl}/admin/v1/org/${this.organizationId}/mailboxes`;
   }
+
+  get urlExternalContacts() {
+    return `${this.baseUrl}/directory/v1/org/${this.organizationId}/external_contacts`;
+  }
+
+  get urlOauthRestrictions() {
+    return `${this.baseUrl}/security/v1/org/${this.organizationId}/oauth_access_restriction`;
+  }
+
+  get urlServiceApplications() {
+    return `${this.baseUrl}/security/v1/org/${this.organizationId}/service_applications`;
+  }
+
+  get urlDomainPolicies() {
+    return `${this.baseUrl}/admin/v1/org/${this.organizationId}/mail/routing/policies`;
+  }
 }

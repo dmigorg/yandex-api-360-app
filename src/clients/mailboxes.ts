@@ -1,5 +1,4 @@
 import { BaseClient } from "../base-client.js";
-import type { Api360Options } from "../options.js";
 import type {
   Actor,
   ActorListAPIResponse,
@@ -20,10 +19,6 @@ interface TaskIdAPIResponse {
 }
 
 export class MailboxesClient extends BaseClient {
-  constructor(options: Api360Options) {
-    super(options);
-  }
-
   /**
    * Returns a paginated list of delegated mailboxes.
    * @param page - Page number (1-based)
@@ -79,7 +74,7 @@ export class MailboxesClient extends BaseClient {
    * @returns ID of the created shared mailbox
    * @throws {APIRequestError} On validation error or insufficient permissions
    */
-  async add(email: string, name: string, description: string): Promise<number> {
+  async add(email: string, name: string, description: string): Promise<string> {
     if (!email) throw new Error("email is required");
     if (!name) throw new Error("name is required");
     if (!description) throw new Error("description is required");
@@ -92,22 +87,22 @@ export class MailboxesClient extends BaseClient {
 
   /**
    * Returns information about a shared mailbox.
-   * @param id - Shared mailbox identifier
+   * @param id - Shared mailbox identifier (string uint64)
    * @returns Mailbox info object
    */
-  async getInfo(id: number): Promise<MailboxInfo> {
+  async getInfo(id: string): Promise<MailboxInfo> {
     if (!id) throw new Error("id is required");
     return this.httpGet<MailboxInfo>(`${this.options.urlMailboxManagement}/shared/${id}`);
   }
 
   /**
    * Updates the name and description of a shared mailbox.
-   * @param id - Shared mailbox identifier
+   * @param id - Shared mailbox identifier (string uint64)
    * @param name - New display name
    * @param description - New description
    * @returns ID of the updated mailbox
    */
-  async setInfo(id: number, name: string, description: string): Promise<number> {
+  async setInfo(id: string, name: string, description: string): Promise<string> {
     if (!id) throw new Error("id is required");
     const result = await this.httpPut<ResourceIdAPIResponse>(
       `${this.options.urlMailboxManagement}/shared/${id}`,
@@ -118,19 +113,19 @@ export class MailboxesClient extends BaseClient {
 
   /**
    * Deletes a shared mailbox.
-   * @param id - Shared mailbox identifier
+   * @param id - Shared mailbox identifier (string uint64)
    */
-  async removeShared(id: number): Promise<void> {
+  async removeShared(id: string): Promise<void> {
     if (!id) throw new Error("id is required");
     await this.httpDelete(`${this.options.urlMailboxManagement}/shared/${id}`);
   }
 
   /**
    * Returns the list of employees with access to a mailbox.
-   * @param id - Mailbox resource identifier
+   * @param id - Mailbox resource identifier (string uint64)
    * @returns Array of actors with their roles
    */
-  async getActors(id: number): Promise<Actor[]> {
+  async getActors(id: string): Promise<Actor[]> {
     if (!id) throw new Error("id is required");
     const result = await this.httpGet<ActorListAPIResponse>(
       `${this.options.urlMailboxManagement}/actors/${id}`,
@@ -140,51 +135,51 @@ export class MailboxesClient extends BaseClient {
 
   /**
    * Returns the list of mailboxes accessible to a user.
-   * @param userId - User identifier
+   * @param actorId - Actor (directory user) identifier
    * @returns Array of resources with their types and roles
    */
-  async getMailboxesFromUser(userId: number): Promise<Resource[]> {
-    if (!userId) throw new Error("userId is required");
+  async getMailboxesFromUser(actorId: string): Promise<Resource[]> {
+    if (!actorId) throw new Error("actorId is required");
     const result = await this.httpGet<ResourceListAPIResponse>(
-      `${this.options.urlMailboxManagement}/resources/${userId}`,
+      `${this.options.urlMailboxManagement}/resources/${actorId}`,
     );
     return result.resources;
   }
 
   /**
    * Enables delegation for a mailbox (allows granting access to it).
-   * @param id - Mailbox owner's user ID
+   * @param id - Mailbox owner's resource identifier (string uint64)
    * @returns Resource ID of the delegated mailbox
    */
-  async delegateAllow(id: number): Promise<number> {
+  async delegateAllow(id: string): Promise<string> {
     if (!id) throw new Error("id is required");
     const result = await this.httpPut<ResourceIdAPIResponse>(
       `${this.options.urlMailboxManagement}/delegated`,
-      { resourceId: String(id) },
+      { resourceId: id },
     );
     return result.resourceId;
   }
 
   /**
    * Disables delegation for a mailbox.
-   * @param id - Mailbox resource identifier
+   * @param id - Mailbox resource identifier (string uint64)
    */
-  async delegateDeny(id: number): Promise<void> {
+  async delegateDeny(id: string): Promise<void> {
     if (!id) throw new Error("id is required");
     await this.httpDelete(`${this.options.urlMailboxManagement}/delegated/${id}`);
   }
 
   /**
    * Sets (grants or updates) access roles for an employee on a mailbox. The operation is async.
-   * @param resourceId - Mailbox resource identifier
-   * @param actorId - Employee identifier to grant access to
+   * @param resourceId - Mailbox resource identifier (string uint64)
+   * @param actorId - Employee identifier to grant access to (string uint64)
    * @param roles - Roles to assign
    * @param notify - Who to notify: `all`, `delegates`, or `none`
    * @returns Task ID for polling the operation status
    */
   async setRules(
-    resourceId: number,
-    actorId: number,
+    resourceId: string,
+    actorId: string,
     roles: RoleType[],
     notify: NotifyType = NotifyType.All,
   ): Promise<string> {
