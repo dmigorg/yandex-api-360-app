@@ -30,6 +30,12 @@ export interface Department extends BaseDepartment {
   membersCount: number;
 }
 
+/** Editable fields for updating an existing department */
+export interface DepartmentEdit extends Partial<BaseDepartment> {
+  /** Unique numeric department identifier */
+  id: number;
+}
+
 /** Compact department object used inside group member lists */
 export interface DepartmentShort {
   id: number;

@@ -1,3 +1,4 @@
+export { BaseClient } from "./base-client.js";
 export { Client } from "./client.js";
 export { AntispamClient } from "./clients/antispam.js";
 export type { GetDiskLogParams, GetMailLogParams } from "./clients/audit.js";

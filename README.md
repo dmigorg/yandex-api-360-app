@@ -7,17 +7,17 @@ TypeScript-клиент для [Yandex 360 for Business API](https://yandex.ru/d
 ## Установка
 
 ```bash
-bun add yandex-api-360
+bun add @dmigorg/yandex-api-360
 ```
 
 ```bash
-npm install yandex-api-360
+npm install @dmigorg/yandex-api-360
 ```
 
 ## Быстрый старт
 
 ```ts
-import { Client } from "yandex-api-360";
+import { Client } from "@dmigorg/yandex-api-360";
 
 const client = new Client({
   organizationId: "123456",
@@ -53,7 +53,7 @@ const client = new Client({
 ### Создание пользователя
 
 ```ts
-import { Client } from "yandex-api-360";
+import { Client } from "@dmigorg/yandex-api-360";
 
 const client = new Client({ organizationId: "123456", token: "y0_AgAAAA..." });
 
@@ -128,7 +128,7 @@ const all = await client.departments.getAll();
 ### Управление группами
 
 ```ts
-import { MemberTypes } from "yandex-api-360";
+import { MemberTypes } from "@dmigorg/yandex-api-360";
 
 // Создать группу
 const group = await client.groups.add({
@@ -152,7 +152,7 @@ await client.groups.addMembers(group.id, {
 ### Управление общим почтовым ящиком
 
 ```ts
-import { RoleType } from "yandex-api-360";
+import { RoleType } from "@dmigorg/yandex-api-360";
 
 // Создать общий ящик
 const resourceId = await client.mailboxes.add(
@@ -220,7 +220,7 @@ if (status.has2fa && status.hasSecurityPhone) {
 ### DNS-записи домена
 
 ```ts
-import { DNSRecordTypes } from "yandex-api-360";
+import { DNSRecordTypes } from "@dmigorg/yandex-api-360";
 
 // Все записи домена
 const records = await client.dns.getAll("example.com");
@@ -241,7 +241,7 @@ const record = await client.dns.add("example.com", {
 Все методы бросают `APIRequestError` при HTTP-ошибках (400, 401, 403, 404, 500):
 
 ```ts
-import { APIRequestError, Client } from "yandex-api-360";
+import { APIRequestError, Client } from "@dmigorg/yandex-api-360";
 
 try {
   await client.users.add({ /* ... */ });
@@ -262,7 +262,7 @@ try {
 | `maxResponseCount` | `number` | `1000` | Лимит на страницу при `getAll()` |
 
 ```ts
-import { Api360Options, Client } from "yandex-api-360";
+import { Api360Options, Client } from "@dmigorg/yandex-api-360";
 
 // Прямая передача параметров
 const client = new Client({

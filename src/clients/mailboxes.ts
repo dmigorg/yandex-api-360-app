@@ -115,7 +115,7 @@ export class MailboxesClient extends BaseClient {
    * Deletes a shared mailbox.
    * @param id - Shared mailbox identifier (string uint64)
    */
-  async removeShared(id: string): Promise<void> {
+  async remove(id: string): Promise<void> {
     if (!id) throw new Error("id is required");
     await this.httpDelete(`${this.options.urlMailboxManagement}/shared/${id}`);
   }
@@ -185,11 +185,10 @@ export class MailboxesClient extends BaseClient {
   ): Promise<string> {
     if (!resourceId) throw new Error("resourceId is required");
     if (!actorId) throw new Error("actorId is required");
-    const notifyParam = notify === NotifyType.All ? "" : `&notify=${notify}`;
-    const result = await this.httpPost<TaskIdAPIResponse>(
-      `${this.options.urlMailboxManagement}/set/${resourceId}?actorId=${actorId}${notifyParam}`,
-      { roles: roles ?? [] },
-    );
+    const url = new URL(`${this.options.urlMailboxManagement}/set/${resourceId}`);
+    url.searchParams.set("actorId", actorId);
+    if (notify !== NotifyType.All) url.searchParams.set("notify", notify);
+    const result = await this.httpPost<TaskIdAPIResponse>(url.toString(), { roles: roles ?? [] });
     return result.taskId;
   }
 

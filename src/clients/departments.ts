@@ -2,6 +2,7 @@ import { BaseClient } from "../base-client.js";
 import type {
   BaseDepartment,
   Department,
+  DepartmentEdit,
   DepartmentsList,
   RemovedAlias,
   RemovedElement,
@@ -73,12 +74,10 @@ export class DepartmentsClient extends BaseClient {
    * @param department - Department with updated fields; must include `id`
    * @returns Updated department object
    */
-  async edit(department: Department): Promise<Department> {
+  async edit(department: DepartmentEdit): Promise<Department> {
     if (!department) throw new Error("department is required");
-    return this.httpPatch<Department>(
-      `${this.options.urlDepartments}/${department.id}`,
-      department,
-    );
+    const { id, ...fields } = department;
+    return this.httpPatch<Department>(`${this.options.urlDepartments}/${id}`, fields);
   }
 
   /**

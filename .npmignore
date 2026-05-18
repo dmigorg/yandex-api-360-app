@@ -1,0 +1,6 @@
+src/
+docs/
+*.lock
+biome.json
+tsconfig.json
+.claude/

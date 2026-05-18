@@ -19,7 +19,7 @@ export abstract class BaseClient {
   }
 
   private async checkResponse(response: Response): Promise<void> {
-    if (response.status === 200 || response.status === 201) return;
+    if (response.status === 200 || response.status === 201 || response.status === 204) return;
 
     if (ERROR_STATUSES.has(response.status)) {
       let body: FailedAPIResponse | null = null;
@@ -79,14 +79,8 @@ export abstract class BaseClient {
       headers: this.headers,
     });
     await this.checkResponse(response);
-    if (response.status === 204 || response.headers.get("content-length") === "0") {
-      return undefined as T;
-    }
-    try {
-      return response.json() as Promise<T>;
-    } catch {
-      return undefined as T;
-    }
+    if (response.status === 204) return undefined as T;
+    return response.json() as Promise<T>;
   }
 
   protected async httpPutBinary<T>(

@@ -1,7 +1,7 @@
 {
-  "name": "yandex-api-360",
-  "version": "1.0.0",
-  "description": "Bun.js TypeScript client for Yandex 360 for Business API",
+  "name": "@dmigorg/yandex-api-360",
+  "version": "1.0.1",
+  "description": "TypeScript client for Yandex 360 for Business API",
   "type": "module",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -14,7 +14,8 @@
   },
   "files": [
     "dist",
-    "src"
+    "LICENSE",
+    "CHANGELOG.md"
   ],
   "scripts": {
     "build": "bun build src/index.ts --outdir dist --target bun && bunx tsc --emitDeclarationOnly",
@@ -29,10 +30,24 @@
   },
   "keywords": [
     "yandex",
-    "360",
-    "api",
-    "bun",
-    "typescript"
+    "yandex-360",
+    "api-client",
+    "typescript",
+    "directory",
+    "users",
+    "departments"
   ],
-  "license": "MIT"
+  "license": "MIT",
+  "author": "dmigorg",
+  "engines": {
+    "node": ">=18"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dmigorg/yandex-api-360-app"
+  },
+  "homepage": "https://github.com/dmigorg/yandex-api-360-app#readme",
+  "bugs": {
+    "url": "https://github.com/dmigorg/yandex-api-360-app/issues"
+  }
 }
