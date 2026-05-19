@@ -10,6 +10,14 @@ export interface FailedAPIResponse {
   details?: FailedAPIResponseDetail[];
 }
 
+/** Thrown when a required argument is missing or invalid. */
+export class ValidationError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "ValidationError";
+  }
+}
+
 export class APIRequestError extends Error {
   readonly statusCode: number;
   readonly errorData?: FailedAPIResponse;

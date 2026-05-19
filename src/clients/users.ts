@@ -1,4 +1,5 @@
 import { BaseClient } from "../base-client.js";
+import { ValidationError } from "../errors.js";
 import type {
   BaseContact,
   RemovedAlias,
@@ -16,6 +17,7 @@ export class UsersClient extends BaseClient {
    * @param page - Page number (1-based)
    * @param perPage - Items per page
    * @returns Paginated user list
+   * @throws {APIRequestError} On HTTP error response
    */
   async getList(page = 1, perPage = 10): Promise<UsersList> {
     return this.httpGet<UsersList>(`${this.options.urlUsers}?page=${page}&perPage=${perPage}`);
@@ -24,6 +26,7 @@ export class UsersClient extends BaseClient {
   /**
    * Returns all users, fetching all pages automatically.
    * @returns Array of all users
+   * @throws {APIRequestError} On HTTP error response
    */
   async getAll(): Promise<User[]> {
     const result: User[] = [];
@@ -40,6 +43,7 @@ export class UsersClient extends BaseClient {
    * Returns a single user by ID.
    * @param userId - User identifier
    * @returns User object
+   * @throws {APIRequestError} On HTTP error response
    */
   async getById(userId: number): Promise<User> {
     return this.httpGet<User>(`${this.options.urlUsers}/${userId}`);
@@ -49,10 +53,11 @@ export class UsersClient extends BaseClient {
    * Creates a new user in the organization.
    * @param user - User data to create
    * @returns Created user object
-   * @throws {APIRequestError} On validation error or insufficient permissions
+   * @throws {ValidationError} If `user` is null or undefined
+   * @throws {APIRequestError} On HTTP error response
    */
   async add(user: UserAdd): Promise<User> {
-    if (!user) throw new Error("user is required");
+    if (!user) throw new ValidationError("user is required");
     return this.httpPost<User>(this.options.urlUsers, user);
   }
 
@@ -60,9 +65,11 @@ export class UsersClient extends BaseClient {
    * Updates user fields (only provided fields are changed).
    * @param user - User edit object; must include `id`
    * @returns Updated user object
+   * @throws {ValidationError} If `user` is null or undefined
+   * @throws {APIRequestError} On HTTP error response
    */
   async edit(user: UserEdit): Promise<User> {
-    if (!user) throw new Error("user is required");
+    if (!user) throw new ValidationError("user is required");
     const { id, ...patch } = user;
     const body = Object.fromEntries(
       Object.entries(patch).filter(([, v]) => v !== undefined && v !== null),
@@ -75,9 +82,11 @@ export class UsersClient extends BaseClient {
    * @param user - Full user object (read from API)
    * @param password - Optional new password
    * @returns Updated user object
+   * @throws {ValidationError} If `user` is null or undefined
+   * @throws {APIRequestError} On HTTP error response
    */
   async editFromUser(user: User, password?: string): Promise<User> {
-    if (!user) throw new Error("user is required");
+    if (!user) throw new ValidationError("user is required");
     const edit: UserEdit = {
       id: user.id,
       about: user.about,
@@ -102,9 +111,11 @@ export class UsersClient extends BaseClient {
    * @param userId - User identifier
    * @param alias - Alias name (without domain)
    * @returns Updated user object
+   * @throws {ValidationError} If `alias` is empty
+   * @throws {APIRequestError} On HTTP error response
    */
   async addAlias(userId: number, alias: string): Promise<User> {
-    if (!alias) throw new Error("alias is required");
+    if (!alias) throw new ValidationError("alias is required");
     return this.httpPost<User>(`${this.options.urlUsers}/${userId}/aliases`, { alias });
   }
 
@@ -113,9 +124,11 @@ export class UsersClient extends BaseClient {
    * @param userId - User identifier
    * @param alias - Alias to remove
    * @returns `true` if removed
+   * @throws {ValidationError} If `alias` is empty
+   * @throws {APIRequestError} On HTTP error response
    */
   async deleteAlias(userId: number, alias: string): Promise<boolean> {
-    if (!alias) throw new Error("alias is required");
+    if (!alias) throw new ValidationError("alias is required");
     const result = await this.httpDelete<RemovedAlias>(
       `${this.options.urlUsers}/${userId}/aliases/${alias}`,
     );
@@ -127,6 +140,7 @@ export class UsersClient extends BaseClient {
    * @param userId - User identifier
    * @param contacts - New contacts list (synthetic contacts cannot be changed)
    * @returns Updated user object
+   * @throws {APIRequestError} On HTTP error response
    */
   async updateContacts(userId: number, contacts: BaseContact[]): Promise<User> {
     return this.httpPut<User>(`${this.options.urlUsers}/${userId}/contacts`, { contacts });
@@ -136,6 +150,7 @@ export class UsersClient extends BaseClient {
    * Deletes all manually added contacts for a user (synthetic contacts are preserved).
    * @param userId - User identifier
    * @returns Updated user object
+   * @throws {APIRequestError} On HTTP error response
    */
   async deleteContacts(userId: number): Promise<User> {
     return this.httpDelete<User>(`${this.options.urlUsers}/${userId}/contacts`);
@@ -145,6 +160,7 @@ export class UsersClient extends BaseClient {
    * Returns whether a user has 2FA configured (v1 check).
    * @param userId - User identifier
    * @returns `true` if the user has 2FA set up
+   * @throws {APIRequestError} On HTTP error response
    */
   async getStatus2FA(userId: number): Promise<boolean> {
     const result = await this.httpGet<UserStatus2FA>(`${this.options.urlUsers}/${userId}/2fa`);
@@ -154,7 +170,7 @@ export class UsersClient extends BaseClient {
   /**
    * Resets the security phone used for 2FA for a user.
    * @param userId - User identifier
-   * @throws {APIRequestError} 400 if user has no security phone configured
+   * @throws {APIRequestError} 400 if the user has no security phone configured
    */
   async clear2FA(userId: number): Promise<void> {
     await this.httpDelete(`${this.options.urlUsers}/${userId}/2fa`);
@@ -164,6 +180,7 @@ export class UsersClient extends BaseClient {
    * Returns the personal 2FA status for a user (v2 per-user mode only).
    * @param userId - User identifier
    * @returns Object with `id` and `is2faEnabled` flag
+   * @throws {APIRequestError} On HTTP error response
    */
   async getDomain2fa(userId: number): Promise<UserDomain2FA> {
     return this.httpGet<UserDomain2FA>(`${this.options.urlUsers}/${userId}/domain_2fa`);
@@ -173,6 +190,7 @@ export class UsersClient extends BaseClient {
    * Enables or disables personal 2FA for a user (v2 per-user mode only).
    * @param userId - User identifier
    * @param is2faEnabled - `true` to enable, `false` to disable
+   * @throws {APIRequestError} On HTTP error response
    */
   async updateDomain2fa(userId: number, is2faEnabled: boolean): Promise<void> {
     await this.httpPatch<unknown>(
@@ -186,13 +204,15 @@ export class UsersClient extends BaseClient {
    * @param imageData - Image data as ArrayBuffer or Blob
    * @param contentType - MIME type of the image (default: `image/png`)
    * @returns URL of the uploaded avatar
+   * @throws {ValidationError} If `imageData` is null or undefined
+   * @throws {APIRequestError} On HTTP error response
    */
   async setAvatar(
     userId: number,
     imageData: ArrayBuffer | Blob,
     contentType = "image/png",
   ): Promise<string> {
-    if (!imageData) throw new Error("imageData is required");
+    if (!imageData) throw new ValidationError("imageData is required");
     const result = await this.httpPutBinary<{ url: string }>(
       `${this.options.urlUsers}/${userId}/avatar`,
       imageData,

@@ -1,4 +1,5 @@
 import { BaseClient } from "../base-client.js";
+import { ValidationError } from "../errors.js";
 import type {
   Actor,
   ActorListAPIResponse,
@@ -24,6 +25,7 @@ export class MailboxesClient extends BaseClient {
    * @param page - Page number (1-based)
    * @param perPage - Items per page
    * @returns Array of delegated mailbox resource stubs
+   * @throws {APIRequestError} On HTTP error response
    */
   async getDelegatedList(page = 1, perPage = 10): Promise<ResourceShort[]> {
     const result = await this.httpGet<MailboxListAPIResponse>(
@@ -35,6 +37,7 @@ export class MailboxesClient extends BaseClient {
   /**
    * Returns all delegated mailboxes, fetching all pages automatically.
    * @returns Array of all delegated mailbox resource stubs
+   * @throws {APIRequestError} On HTTP error response
    */
   async getAllDelegated(): Promise<ResourceShort[]> {
     const initial = await this.httpGet<MailboxListAPIResponse>(
@@ -58,6 +61,7 @@ export class MailboxesClient extends BaseClient {
    * @param page - Page number (1-based)
    * @param perPage - Items per page
    * @returns Array of shared mailbox resource stubs
+   * @throws {APIRequestError} On HTTP error response
    */
   async getList(page = 1, perPage = 10): Promise<ResourceShort[]> {
     const result = await this.httpGet<MailboxListAPIResponse>(
@@ -72,12 +76,13 @@ export class MailboxesClient extends BaseClient {
    * @param name - Display name
    * @param description - Description
    * @returns ID of the created shared mailbox
-   * @throws {APIRequestError} On validation error or insufficient permissions
+   * @throws {ValidationError} If `email`, `name`, or `description` is empty
+   * @throws {APIRequestError} On HTTP error response
    */
   async add(email: string, name: string, description: string): Promise<string> {
-    if (!email) throw new Error("email is required");
-    if (!name) throw new Error("name is required");
-    if (!description) throw new Error("description is required");
+    if (!email) throw new ValidationError("email is required");
+    if (!name) throw new ValidationError("name is required");
+    if (!description) throw new ValidationError("description is required");
     const result = await this.httpPut<ResourceIdAPIResponse>(
       `${this.options.urlMailboxManagement}/shared`,
       { email, name, description },
@@ -89,9 +94,11 @@ export class MailboxesClient extends BaseClient {
    * Returns information about a shared mailbox.
    * @param id - Shared mailbox identifier (string uint64)
    * @returns Mailbox info object
+   * @throws {ValidationError} If `id` is empty
+   * @throws {APIRequestError} On HTTP error response
    */
   async getInfo(id: string): Promise<MailboxInfo> {
-    if (!id) throw new Error("id is required");
+    if (!id) throw new ValidationError("id is required");
     return this.httpGet<MailboxInfo>(`${this.options.urlMailboxManagement}/shared/${id}`);
   }
 
@@ -101,9 +108,11 @@ export class MailboxesClient extends BaseClient {
    * @param name - New display name
    * @param description - New description
    * @returns ID of the updated mailbox
+   * @throws {ValidationError} If `id` is empty
+   * @throws {APIRequestError} On HTTP error response
    */
   async setInfo(id: string, name: string, description: string): Promise<string> {
-    if (!id) throw new Error("id is required");
+    if (!id) throw new ValidationError("id is required");
     const result = await this.httpPut<ResourceIdAPIResponse>(
       `${this.options.urlMailboxManagement}/shared/${id}`,
       { name, description },
@@ -114,9 +123,11 @@ export class MailboxesClient extends BaseClient {
   /**
    * Deletes a shared mailbox.
    * @param id - Shared mailbox identifier (string uint64)
+   * @throws {ValidationError} If `id` is empty
+   * @throws {APIRequestError} On HTTP error response
    */
   async remove(id: string): Promise<void> {
-    if (!id) throw new Error("id is required");
+    if (!id) throw new ValidationError("id is required");
     await this.httpDelete(`${this.options.urlMailboxManagement}/shared/${id}`);
   }
 
@@ -124,9 +135,11 @@ export class MailboxesClient extends BaseClient {
    * Returns the list of employees with access to a mailbox.
    * @param id - Mailbox resource identifier (string uint64)
    * @returns Array of actors with their roles
+   * @throws {ValidationError} If `id` is empty
+   * @throws {APIRequestError} On HTTP error response
    */
   async getActors(id: string): Promise<Actor[]> {
-    if (!id) throw new Error("id is required");
+    if (!id) throw new ValidationError("id is required");
     const result = await this.httpGet<ActorListAPIResponse>(
       `${this.options.urlMailboxManagement}/actors/${id}`,
     );
@@ -137,9 +150,11 @@ export class MailboxesClient extends BaseClient {
    * Returns the list of mailboxes accessible to a user.
    * @param actorId - Actor (directory user) identifier
    * @returns Array of resources with their types and roles
+   * @throws {ValidationError} If `actorId` is empty
+   * @throws {APIRequestError} On HTTP error response
    */
   async getMailboxesFromUser(actorId: string): Promise<Resource[]> {
-    if (!actorId) throw new Error("actorId is required");
+    if (!actorId) throw new ValidationError("actorId is required");
     const result = await this.httpGet<ResourceListAPIResponse>(
       `${this.options.urlMailboxManagement}/resources/${actorId}`,
     );
@@ -150,9 +165,11 @@ export class MailboxesClient extends BaseClient {
    * Enables delegation for a mailbox (allows granting access to it).
    * @param id - Mailbox owner's resource identifier (string uint64)
    * @returns Resource ID of the delegated mailbox
+   * @throws {ValidationError} If `id` is empty
+   * @throws {APIRequestError} On HTTP error response
    */
   async delegateAllow(id: string): Promise<string> {
-    if (!id) throw new Error("id is required");
+    if (!id) throw new ValidationError("id is required");
     const result = await this.httpPut<ResourceIdAPIResponse>(
       `${this.options.urlMailboxManagement}/delegated`,
       { resourceId: id },
@@ -163,9 +180,11 @@ export class MailboxesClient extends BaseClient {
   /**
    * Disables delegation for a mailbox.
    * @param id - Mailbox resource identifier (string uint64)
+   * @throws {ValidationError} If `id` is empty
+   * @throws {APIRequestError} On HTTP error response
    */
   async delegateDeny(id: string): Promise<void> {
-    if (!id) throw new Error("id is required");
+    if (!id) throw new ValidationError("id is required");
     await this.httpDelete(`${this.options.urlMailboxManagement}/delegated/${id}`);
   }
 
@@ -176,6 +195,8 @@ export class MailboxesClient extends BaseClient {
    * @param roles - Roles to assign
    * @param notify - Who to notify: `all`, `delegates`, or `none`
    * @returns Task ID for polling the operation status
+   * @throws {ValidationError} If `resourceId` or `actorId` is empty
+   * @throws {APIRequestError} On HTTP error response
    */
   async setRules(
     resourceId: string,
@@ -183,8 +204,8 @@ export class MailboxesClient extends BaseClient {
     roles: RoleType[],
     notify: NotifyType = NotifyType.All,
   ): Promise<string> {
-    if (!resourceId) throw new Error("resourceId is required");
-    if (!actorId) throw new Error("actorId is required");
+    if (!resourceId) throw new ValidationError("resourceId is required");
+    if (!actorId) throw new ValidationError("actorId is required");
     const url = new URL(`${this.options.urlMailboxManagement}/set/${resourceId}`);
     url.searchParams.set("actorId", actorId);
     if (notify !== NotifyType.All) url.searchParams.set("notify", notify);
@@ -196,9 +217,11 @@ export class MailboxesClient extends BaseClient {
    * Returns the status of an async mailbox access task.
    * @param taskId - Task identifier returned by `setRules`
    * @returns Current task status: `running`, `complete`, or `error`
+   * @throws {ValidationError} If `taskId` is empty
+   * @throws {APIRequestError} On HTTP error response
    */
   async getTaskStatus(taskId: string): Promise<TaskStatus> {
-    if (!taskId) throw new Error("taskId is required");
+    if (!taskId) throw new ValidationError("taskId is required");
     const result = await this.httpGet<TaskStatusResponse>(
       `${this.options.urlMailboxManagement}/tasks/${taskId}`,
     );

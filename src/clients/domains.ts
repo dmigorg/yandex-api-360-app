@@ -1,4 +1,5 @@
 import { BaseClient } from "../base-client.js";
+import { ValidationError } from "../errors.js";
 import type { Domain, DomainConnectStatus, DomainList } from "../types/index.js";
 
 export class DomainsClient extends BaseClient {
@@ -7,6 +8,7 @@ export class DomainsClient extends BaseClient {
    * @param page - Page number (1-based)
    * @param perPage - Items per page (max 10)
    * @returns Paginated domain list
+   * @throws {APIRequestError} On HTTP error response
    */
   async getList(page = 1, perPage = 10): Promise<DomainList> {
     return this.httpGet<DomainList>(`${this.options.urlDomains}?page=${page}&perPage=${perPage}`);
@@ -15,6 +17,7 @@ export class DomainsClient extends BaseClient {
   /**
    * Returns all domains, fetching all pages automatically.
    * @returns Array of all domains
+   * @throws {APIRequestError} On HTTP error response
    */
   async getAll(): Promise<Domain[]> {
     const initial = await this.getList();
@@ -33,20 +36,22 @@ export class DomainsClient extends BaseClient {
    * Adds a new domain to the organization.
    * @param domainName - Full domain name (e.g. `example.com`)
    * @returns Created domain object
-   * @throws {APIRequestError} On invalid domain or insufficient permissions
+   * @throws {ValidationError} If `domainName` is empty
+   * @throws {APIRequestError} On HTTP error response
    */
   async add(domainName: string): Promise<Domain> {
-    if (!domainName) throw new Error("domainName is required");
+    if (!domainName) throw new ValidationError("domainName is required");
     return this.httpPost<Domain>(this.options.urlDomains, { domain: domainName });
   }
 
   /**
    * Removes a domain from the organization.
    * @param domainName - Full domain name to remove
-   * @throws {APIRequestError} If domain cannot be removed (e.g. technical domain)
+   * @throws {ValidationError} If `domainName` is empty
+   * @throws {APIRequestError} If the domain cannot be removed (e.g. technical domain)
    */
   async remove(domainName: string): Promise<void> {
-    if (!domainName) throw new Error("domainName is required");
+    if (!domainName) throw new ValidationError("domainName is required");
     await this.httpDelete(`${this.options.urlDomains}/${domainName}`);
   }
 
@@ -54,6 +59,7 @@ export class DomainsClient extends BaseClient {
    * Returns the connection status and verification methods for a domain.
    * @param domainName - Full domain name
    * @returns Domain connection status with confirmation methods
+   * @throws {APIRequestError} On HTTP error response
    */
   async getStatus(domainName: string): Promise<DomainConnectStatus> {
     return this.httpGet<DomainConnectStatus>(`${this.options.urlDomains}/${domainName}/status`);
@@ -63,6 +69,7 @@ export class DomainsClient extends BaseClient {
    * Returns the DKIM signature status for a domain.
    * @param domainName - Full domain name
    * @returns DKIM status object with `enabled` flag and `publicKey`
+   * @throws {APIRequestError} On HTTP error response
    */
   async getDKIMStatus(domainName: string): Promise<{ enabled: boolean; publicKey: string }> {
     return this.httpGet<{ enabled: boolean; publicKey: string }>(

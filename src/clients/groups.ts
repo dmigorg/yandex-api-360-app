@@ -1,4 +1,5 @@
 import { BaseClient } from "../base-client.js";
+import { ValidationError } from "../errors.js";
 import type {
   AddedMember,
   BaseGroup,
@@ -18,6 +19,7 @@ export class GroupsClient extends BaseClient {
    * @param page - Page number (1-based)
    * @param perPage - Items per page
    * @returns Paginated group list
+   * @throws {APIRequestError} On HTTP error response
    */
   async getList(page = 1, perPage = 10): Promise<GroupsList> {
     return this.httpGet<GroupsList>(`${this.options.urlGroups}?page=${page}&perPage=${perPage}`);
@@ -26,6 +28,7 @@ export class GroupsClient extends BaseClient {
   /**
    * Returns all groups, fetching all pages automatically.
    * @returns Array of all groups
+   * @throws {APIRequestError} On HTTP error response
    */
   async getAll(): Promise<Group[]> {
     const result: Group[] = [];
@@ -42,6 +45,7 @@ export class GroupsClient extends BaseClient {
    * Returns a single group by ID.
    * @param groupId - Group identifier
    * @returns Group object
+   * @throws {APIRequestError} On HTTP error response
    */
   async getById(groupId: number): Promise<Group> {
     return this.httpGet<Group>(`${this.options.urlGroups}/${groupId}`);
@@ -51,10 +55,11 @@ export class GroupsClient extends BaseClient {
    * Creates a new group.
    * @param group - Group data to create
    * @returns Created group object
-   * @throws {APIRequestError} On validation error or insufficient permissions
+   * @throws {ValidationError} If `group` is null or undefined
+   * @throws {APIRequestError} On HTTP error response
    */
   async add(group: BaseGroup): Promise<Group> {
-    if (!group) throw new Error("group is required");
+    if (!group) throw new ValidationError("group is required");
     return this.httpPost<Group>(this.options.urlGroups, group);
   }
 
@@ -62,6 +67,7 @@ export class GroupsClient extends BaseClient {
    * Updates group fields (only provided fields are changed).
    * @param group - Group with updated fields; must include `id`
    * @returns Updated group object
+   * @throws {APIRequestError} On HTTP error response
    */
   async edit(group: Group): Promise<Group> {
     const { id, ...base } = group;
@@ -72,6 +78,7 @@ export class GroupsClient extends BaseClient {
    * Deletes a group (members are not deleted).
    * @param groupId - Group identifier
    * @returns `true` if deleted
+   * @throws {APIRequestError} On HTTP error response
    */
   async remove(groupId: number): Promise<boolean> {
     const result = await this.httpDelete<RemovedElement>(`${this.options.urlGroups}/${groupId}`);
@@ -82,6 +89,7 @@ export class GroupsClient extends BaseClient {
    * Returns the list of group members (v1: users, groups, departments).
    * @param groupId - Group identifier
    * @returns Members list
+   * @throws {APIRequestError} On HTTP error response
    */
   async getMembers(groupId: number): Promise<MembersList> {
     return this.httpGet<MembersList>(`${this.options.urlGroups}/${groupId}/members`);
@@ -91,6 +99,7 @@ export class GroupsClient extends BaseClient {
    * Returns the list of group members (v2: includes external contacts and shared mailboxes).
    * @param groupId - Group identifier
    * @returns Extended members list
+   * @throws {APIRequestError} On HTTP error response
    */
   async getMembers2(groupId: number): Promise<MembersList2> {
     return this.httpGet<MembersList2>(`${this.options.urlGroups2}/${groupId}/members`);
@@ -101,9 +110,11 @@ export class GroupsClient extends BaseClient {
    * @param groupId - Group identifier
    * @param member - Member to add (type + id)
    * @returns `true` if added
+   * @throws {ValidationError} If `member` is null or undefined
+   * @throws {APIRequestError} On HTTP error response
    */
   async addMember(groupId: number, member: Member): Promise<boolean> {
-    if (!member) throw new Error("member is required");
+    if (!member) throw new ValidationError("member is required");
     const result = await this.httpPost<AddedMember>(
       `${this.options.urlGroups}/${groupId}/members`,
       member,
@@ -116,6 +127,7 @@ export class GroupsClient extends BaseClient {
    * @param groupId - Group identifier
    * @param member - Member to remove (type + id)
    * @returns `true` if deleted
+   * @throws {APIRequestError} On HTTP error response
    */
   async removeMember(groupId: number, member: Member): Promise<boolean> {
     const result = await this.httpDelete<DeletedMember>(
@@ -128,6 +140,7 @@ export class GroupsClient extends BaseClient {
    * Removes all members from a group.
    * @param groupId - Group identifier
    * @returns Updated (empty) members list
+   * @throws {APIRequestError} On HTTP error response
    */
   async removeAllMembers(groupId: number): Promise<MembersList> {
     return this.httpDelete<MembersList>(`${this.options.urlGroups}/${groupId}/members`);
@@ -137,6 +150,7 @@ export class GroupsClient extends BaseClient {
    * Removes all admins/managers from a group.
    * @param groupId - Group identifier
    * @returns Updated group object
+   * @throws {APIRequestError} On HTTP error response
    */
   async removeAllManagers(groupId: number): Promise<Group> {
     return this.httpDelete<Group>(`${this.options.urlGroups}/${groupId}/admins`);
@@ -147,6 +161,7 @@ export class GroupsClient extends BaseClient {
    * @param groupId - Group identifier
    * @param adminIds - Array of user IDs to set as admins
    * @returns Updated group object
+   * @throws {APIRequestError} On HTTP error response
    */
   async editManagers(groupId: number, adminIds: number[]): Promise<Group> {
     return this.httpPut<Group>(`${this.options.urlGroups}/${groupId}/admins`, { adminIds });
@@ -157,6 +172,7 @@ export class GroupsClient extends BaseClient {
    * @param groupId - Group identifier
    * @param members - New full member list
    * @returns Updated members list
+   * @throws {APIRequestError} On HTTP error response
    */
   async editMembers(groupId: number, members: Member[]): Promise<MembersList> {
     return this.httpPut<MembersList>(`${this.options.urlGroups}/${groupId}/members`, { members });
@@ -167,6 +183,7 @@ export class GroupsClient extends BaseClient {
    * @param groupId - Group identifier
    * @param opts - IDs to add by type (`userIds`, `externalContactIds`, `sharedMailboxIds` are string uint64)
    * @returns `true` if the request succeeded
+   * @throws {APIRequestError} On HTTP error response
    */
   async addMembers(
     groupId: number,
@@ -196,6 +213,7 @@ export class GroupsClient extends BaseClient {
    * @param groupId - Group identifier
    * @param members - Members to add
    * @returns `true` if the request succeeded
+   * @throws {APIRequestError} On HTTP error response
    */
   async addMembersList(groupId: number, members: Member[]): Promise<boolean> {
     const userIds = members.filter((m) => m.type === MemberTypes.user).map((m) => String(m.id));
@@ -213,6 +231,7 @@ export class GroupsClient extends BaseClient {
    * @param groupId - Group identifier
    * @param opts - IDs to remove by type (`userIds`, `externalContactIds`, `sharedMailboxIds` are string uint64)
    * @returns `true` if the request succeeded
+   * @throws {APIRequestError} On HTTP error response
    */
   async removeMembers(
     groupId: number,

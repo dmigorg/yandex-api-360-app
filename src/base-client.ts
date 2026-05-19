@@ -34,6 +34,9 @@ export abstract class BaseClient {
     throw new APIRequestError(response.statusText || "Unknown error", response.status);
   }
 
+  /**
+   * @throws {APIRequestError} On non-success HTTP status
+   */
   protected async httpGet<T>(url: string): Promise<T> {
     const response = await fetch(url, {
       method: "GET",
@@ -43,6 +46,9 @@ export abstract class BaseClient {
     return response.json() as Promise<T>;
   }
 
+  /**
+   * @throws {APIRequestError} On non-success HTTP status
+   */
   protected async httpPost<T>(url: string, body?: unknown): Promise<T> {
     const response = await fetch(url, {
       method: "POST",
@@ -53,6 +59,9 @@ export abstract class BaseClient {
     return response.json() as Promise<T>;
   }
 
+  /**
+   * @throws {APIRequestError} On non-success HTTP status
+   */
   protected async httpPut<T>(url: string, body?: unknown): Promise<T> {
     const response = await fetch(url, {
       method: "PUT",
@@ -63,6 +72,9 @@ export abstract class BaseClient {
     return response.json() as Promise<T>;
   }
 
+  /**
+   * @throws {APIRequestError} On non-success HTTP status
+   */
   protected async httpPatch<T>(url: string, body?: unknown): Promise<T> {
     const response = await fetch(url, {
       method: "PATCH",
@@ -73,6 +85,9 @@ export abstract class BaseClient {
     return response.json() as Promise<T>;
   }
 
+  /**
+   * @throws {APIRequestError} On non-success HTTP status
+   */
   protected async httpDelete<T = void>(url: string): Promise<T> {
     const response = await fetch(url, {
       method: "DELETE",
@@ -83,6 +98,9 @@ export abstract class BaseClient {
     return response.json() as Promise<T>;
   }
 
+  /**
+   * @throws {APIRequestError} On non-success HTTP status
+   */
   protected async httpPutBinary<T>(
     url: string,
     body: ArrayBuffer | Blob,

@@ -1,3 +1,5 @@
+import { ValidationError } from "./errors.js";
+
 export interface Api360OptionsParams {
   organizationId: string;
   token: string;
@@ -13,9 +15,13 @@ export class Api360Options {
   private readonly organizationId: string;
   private readonly baseUrl: string;
 
+  /**
+   * @param params - Client configuration
+   * @throws {ValidationError} If `organizationId` or `token` is empty
+   */
   constructor(params: Api360OptionsParams) {
-    if (!params.organizationId) throw new Error("organizationId is required");
-    if (!params.token) throw new Error("token is required");
+    if (!params.organizationId) throw new ValidationError("organizationId is required");
+    if (!params.token) throw new ValidationError("token is required");
     this.organizationId = params.organizationId;
     this.token = params.token;
     this.baseUrl = params.baseUrl ?? "https://api360.yandex.net";

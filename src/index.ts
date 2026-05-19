@@ -20,7 +20,7 @@ export { ServiceApplicationsClient } from "./clients/service-applications.js";
 export { TwoFAClient } from "./clients/two-fa.js";
 export { UsersClient } from "./clients/users.js";
 export type { FailedAPIResponse, FailedAPIResponseDetail } from "./errors.js";
-export { APIRequestError } from "./errors.js";
+export { APIRequestError, ValidationError } from "./errors.js";
 export type { Api360OptionsParams } from "./options.js";
 export { Api360Options } from "./options.js";
 

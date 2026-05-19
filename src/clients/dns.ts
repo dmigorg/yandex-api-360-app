@@ -1,4 +1,5 @@
 import { BaseClient } from "../base-client.js";
+import { ValidationError } from "../errors.js";
 import type { DNSList, DNSRecord } from "../types/index.js";
 
 export class DNSClient extends BaseClient {
@@ -8,6 +9,7 @@ export class DNSClient extends BaseClient {
    * @param page - Page number (1-based)
    * @param perPage - Items per page
    * @returns Paginated DNS record list
+   * @throws {APIRequestError} On HTTP error response
    */
   async getList(domainName: string, page = 1, perPage = 10): Promise<DNSList> {
     return this.httpGet<DNSList>(
@@ -19,6 +21,7 @@ export class DNSClient extends BaseClient {
    * Returns all DNS records for a domain, fetching all pages automatically.
    * @param domainName - Full domain name
    * @returns Array of all DNS records
+   * @throws {APIRequestError} On HTTP error response
    */
   async getAll(domainName: string): Promise<DNSRecord[]> {
     const initial = await this.getList(domainName);
@@ -38,11 +41,12 @@ export class DNSClient extends BaseClient {
    * @param domainName - Full domain name
    * @param record - DNS record data to create
    * @returns Created DNS record with assigned `recordId`
-   * @throws {APIRequestError} On validation error or insufficient permissions
+   * @throws {ValidationError} If `domainName` or `record` is missing
+   * @throws {APIRequestError} On HTTP error response
    */
   async add(domainName: string, record: DNSRecord): Promise<DNSRecord> {
-    if (!domainName) throw new Error("domainName is required");
-    if (!record) throw new Error("record is required");
+    if (!domainName) throw new ValidationError("domainName is required");
+    if (!record) throw new ValidationError("record is required");
     return this.httpPost<DNSRecord>(`${this.options.urlDomains}/${domainName}/dns`, record);
   }
 
@@ -51,10 +55,12 @@ export class DNSClient extends BaseClient {
    * @param domainName - Full domain name
    * @param record - DNS record with updated fields; must include `recordId`
    * @returns Updated DNS record
+   * @throws {ValidationError} If `record` is null or `record.recordId` is missing
+   * @throws {APIRequestError} On HTTP error response
    */
   async edit(domainName: string, record: DNSRecord): Promise<DNSRecord> {
-    if (!record) throw new Error("record is required");
-    if (record.recordId == null) throw new Error("record.recordId is required");
+    if (!record) throw new ValidationError("record is required");
+    if (record.recordId == null) throw new ValidationError("record.recordId is required");
     return this.httpPost<DNSRecord>(
       `${this.options.urlDomains}/${domainName}/dns/${record.recordId}`,
       record,
@@ -65,9 +71,11 @@ export class DNSClient extends BaseClient {
    * Deletes a DNS record from a domain.
    * @param domainName - Full domain name
    * @param recordId - DNS record identifier
+   * @throws {ValidationError} If `domainName` is empty
+   * @throws {APIRequestError} On HTTP error response
    */
   async remove(domainName: string, recordId: number): Promise<void> {
-    if (!domainName) throw new Error("domainName is required");
+    if (!domainName) throw new ValidationError("domainName is required");
     await this.httpDelete(`${this.options.urlDomains}/${domainName}/dns/${recordId}`);
   }
 }
